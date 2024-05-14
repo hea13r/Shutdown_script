@@ -9,7 +9,7 @@ def ipCheck(x):
     else:
         pass
 
-def ipChecker(x):
+def ipChecker(x): # This could probably be combined with ipCheck(x), I think it is seperated because later ipCheck is used to check if an IP is active or not, but it's something to think about changing
     shutdownList = []
     for i in x:
         shutdownList.append(ipCheck(i))
@@ -25,7 +25,7 @@ answer = "no"
 while answer.lower() == "no":
     print("Checking for active endpoints...")
     shutdownList = ipChecker(ipList)
-    shutdownList = shutdownList[::-1]
+    shutdownList = shutdownList[::-1] # This isn't necessarily required, it was on ours because of how we created the ipList, we wanted it to be reversed for the actual shutdown
     answer = input(f"Are these the IPs you expect to see active? [type no to rescan] \n{shutdownList}\n")
 
 checkAgain = input(f"Do you want to begin shutting down these IPs? [type yes to continue] \n{shutdownList}\n")
@@ -45,14 +45,19 @@ while len(shutdownList) != 0:
 
 print("One final check to make sure everything is off...")
 finalCheck = ipChecker(ipList)
-finalAnswer = input(f"These are the IPs I found still active: {finalCheck}.\nIf blank or [None] type yes to continue, otherwise consider starting over.\n")
-if finalAnswer.lower() != 'yes':
-    exit(0)
+if len(finalAnswer) != 0:
+    finalAnswer = input(f"These are the IPs I found still active: {finalCheck}.\nIf blank or [None] type yes to continue, otherwise consider starting over.\n")
+    if finalAnswer.lower() != 'yes':
+        exit(0)
+else:
+    finalAnswer = input("It appears all IPs are shutdown, if you would like to continue to shutdown this IP enter 'yes'.")
+    if finalAnswer.lower() != 'yes':
+        exit(0)
 
 print("I will now shutdown the control-plane...")
-subprocess.run(['ssh', 'ip', 'shutdown -h now'], stdout=subprocess.DEVNULL) #you must enter the ip
+subprocess.run(['ssh', 'ip', 'shutdown -h now'], stdout=subprocess.DEVNULL) #you must enter the ip for this part
 time.sleep(10) #gives time for it to shutdown before shutting down your machine
-               #also gives you time to remember your machine is about to be shutdown
+               #also gives you time to remember your machine is about to be shutdown so you can cancel if you want
 
 print("I will now shut myself down...")
 subprocess.run(['shutdown', '-h', 'now'])
